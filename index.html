@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How are you feeling?</title>
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        .feeling-options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .feeling-options button {
+            background-color: transparent;
+            border: 1.5px solid #242424;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            font-family: 'Roboto Mono', monospace; /* Gleiche Schriftart wie bei den Zitaten */
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 200px;
+}
+
+        .feeling-options button:hover {
+            color: #777777;
+        }
+
+        #quote-box {
+            display: none;
+            text-align: center;
+            font-size: 2em;
+            color: #000;
+            font-style: italic;
+            padding: 0 20px;
+            max-width: 800px;
+            margin: auto;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        .quote-text {
+            margin-bottom: 70px; /* Reduced space above button */
+            display: flex; /* Use flexbox for centering */
+            justify-content: center; /* Center text horizontally */
+            align-items: center; /* Center text vertically */
+        }
+
+        .new-quote {
+            margin-top: 10px; /* Adjusted margin for better spacing */
+            background-color: transparent; /* Transparent background */
+            color: #cecece;
+            padding: 40px 80px; /* Adjusted padding */
+            font-size: 20px; /* Adjusted font size */
+            border: 2px solid #d9d9d9; /* Subtle outline */
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 150px; /* Fixed width */
+            height: 40px; /* Fixed height */
+            display:contents; /* Use flexbox for centering */
+            justify-content: center; /* Center text horizontally */
+            align-items: center; /* Center text vertically */
+        }
+
+        .new-quote:hover {
+            background-color: #e0e0e0; /* Light gray on hover */
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .controls button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: #888;
+            transition: fill 0.3s;
+        }
+
+        .icon:hover {
+            fill: #000;
+        }
+
+        /* Hidden after selection */
+        .hidden {
+            display: none;
+        }
+
+        #quote-box.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 600px) {
+            .feeling-options button {
+                font-size: 1em;
+                width: 150px;
+            }
+
+            .new-quote {
+                font-size: 0.8em;
+
+            }
+
+            .icon {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="question">How are you feeling?</h1>
+
+    <div class="feeling-options">
+        <button onclick="showQuote('good')">Good</button>
+        <button onclick="showQuote('okay')">Okay</button>
+        <button onclick="showQuote('bad')">Bad</button>
+        <button onclick="showQuote('unsure')">I don't know</button>
+    </div>
+
+    <div id="quote-box">
+        <div class="quote-text" id="quote-text"></div>
+        <button class="new-quote" onclick="showQuote(currentFeeling)">New quote</button>
+    </div>
+
+    <div class="controls">
+        <button onclick="copyQuote()">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M16 1H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4v-2H4V3h12v4h2V3a2 2 0 0 0-2-2zm-1 6H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9l-3-2zm1 14H8V9h5v3h3v9z"/>
+            </svg>
+        </button>
+        <button onclick="shareQuote()">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M18 16.08c-.76 0-1.44.3-1.96.77l-7.12-4.14c.05-.23.08-.47.08-.71s-.03-.48-.08-.71l7.12-4.14c.53.5 1.21.81 1.96.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.03.48.08.71L8.96 9.85C8.43 9.35 7.74 9 7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.74 0 1.43-.35 1.96-.85l7.12 4.14c-.05.23-.08.47-.08.71 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        let quotes = {
+            good: [
+        "\"Today is a good day to be happy.\"",
+        "\"Shine bright, and the world smiles back.\"",
+        "\"Every moment is a new opportunity.\"",
+        "\"Happiness is not something ready-made. It comes from your own actions.\"",
+        "\"The sun is shining, and so are you.\"",
+        "\"Do more of what makes you sparkle.\"",
+        "\"Success is not the key to happiness. Happiness is the key to success.\"",
+        "\"Choose joy today and watch how it changes your world.\"",
+        "\"Be the reason someone smiles today.\"",
+        "\"You have the power to create your own happiness.\"",
+        "\"Your vibe attracts your tribe.\"",
+        "\"Joy is contagious, spread it!\"",
+        "\"The best way to cheer yourself up is to cheer someone else up.\"",
+        "\"Happiness looks good on you.\"",
+        "\"Small steps in the right direction can lead to great joy.\"",
+        "\"Smile, it’s the simplest form of positivity.\"",
+        "\"Life is short. Smile while you still have teeth!\"",
+        "\"Every day may not be good, but there’s something good in every day.\"",
+        "\"You are enough just as you are.\"",
+        "\"Celebrate your progress, no matter how small.\"",
+        "\"The joy of life comes from the journey, not the destination.\"",
+        "\"Count your rainbows, not your thunderstorms.\"",
+        "\"Keep looking up. That’s the secret to life.\"",
+        "\"Laugh as much as you breathe, love as long as you live.\"",
+        "\"The happiest people don’t have the best of everything; they make the best of everything.\"",
+        "\"You glow differently when you're genuinely happy.\"",
+        "\"Spread love wherever you go. Let no one ever come to you without leaving happier.\"",
+        "\"Happiness is not out there, it's in you.\"",
+        "\"Find joy in the ordinary.\"",
+        "\"There is no path to happiness; happiness is the path.\""
+    ],
+    okay: [
+        "\"It's okay not to have all the answers.\"",
+        "\"One step at a time is still progress.\"",
+        "\"You don't have to be perfect to be good.\"",
+        "\"Sometimes, being okay is all you need.\"",
+        "\"Progress, not perfection.\"",
+        "\"You’re doing better than you think.\"",
+        "\"It’s okay to pause. You’re allowed to catch your breath.\"",
+        "\"You are capable of more than you know.\"",
+        "\"Growth is a process, not a destination.\"",
+        "\"Be gentle with yourself. You’re doing the best you can.\"",
+        "\"It's okay to be a work in progress.\"",
+        "\"Even slow progress is progress.\"",
+        "\"You are exactly where you need to be.\"",
+        "\"Rest, but don’t quit.\"",
+        "\"The journey is just as important as the destination.\"",
+        "\"You are allowed to take up space, exactly as you are.\"",
+        "\"Every small step is part of the bigger picture.\"",
+        "\"Give yourself credit for how far you've come.\"",
+        "\"You don’t have to do it all today.\"",
+        "\"Sometimes, it’s okay to just be.\"",
+        "\"Not every day has to be your best day.\"",
+        "\"You’re allowed to have days where you just feel okay.\"",
+        "\"It’s okay to feel unsure and still keep going.\"",
+        "\"Keep showing up. That's all that matters.\"",
+        "\"Inhale courage, exhale doubt.\"",
+        "\"Remember: you are enough.\"",
+        "\"Take it one day at a time.\"",
+        "\"You don’t need to have it all figured out right now.\"",
+        "\"Sometimes, just getting through the day is enough.\"",
+        "\"Every day is a new chance to keep going.\""
+    ],
+    bad: [
+        "\"Even the darkest night will end with the dawn.\"",
+        "\"Tough times never last, but tough people do.\"",
+        "\"This too shall pass.\"",
+        "\"You are stronger than you think.\"",
+        "\"It’s okay to ask for help when you need it.\"",
+        "\"You don’t have to be strong all the time.\"",
+        "\"Sometimes, the hardest days teach us the most.\"",
+        "\"It’s okay to feel what you’re feeling.\"",
+        "\"Healing is not linear.\"",
+        "\"One day, you’ll look back and be proud of how far you’ve come.\"",
+        "\"You are more resilient than you know.\"",
+        "\"Storms make trees take deeper roots.\"",
+        "\"Even the worst storms eventually pass.\"",
+        "\"Be patient with yourself, healing takes time.\"",
+        "\"You are not alone in this struggle.\"",
+        "\"You have survived 100% of your worst days.\"",
+        "\"Sometimes, all you can do is breathe.\"",
+        "\"It’s okay to not be okay right now.\"",
+        "\"Strength comes from struggle.\"",
+        "\"What’s broken can still be mended.\"",
+        "\"It’s okay to rest before you try again.\"",
+        "\"Even on your worst days, you are enough.\"",
+        "\"You are allowed to be both a masterpiece and a work in progress.\"",
+        "\"No rain, no flowers.\"",
+        "\"The wound is the place where the light enters you.\"",
+        "\"Out of difficulties grow miracles.\"",
+        "\"Sometimes, the bravest thing you can do is keep going.\"",
+        "\"You have the power to rewrite your story.\"",
+        "\"This moment is not the end of your story.\"",
+        "\"Every day you’re alive is a victory.\""
+    ],
+    unsure: [
+        "\"Sometimes, clarity comes with time.\"",
+        "\"It's okay to not know everything right now.\"",
+        "\"Not all who wander are lost.\"",
+        "\"The journey is just as important as the destination.\"",
+        "\"Uncertainty is a necessary companion to growth.\"",
+        "\"It’s okay to feel lost; sometimes it’s how we find ourselves.\"",
+        "\"The answers will come when the time is right.\"",
+        "\"Doubt is a sign that you’re thinking deeply.\"",
+        "\"You don’t need to have all the answers right now.\"",
+        "\"Trust the process, even when it feels unclear.\"",
+        "\"Uncertainty is where new possibilities begin.\"",
+        "\"Embrace the unknown; it’s where discovery happens.\"",
+        "\"Sometimes, you have to let go of certainty to find clarity.\"",
+        "\"It’s okay to change your mind as you learn more.\"",
+        "\"The only certainty in life is uncertainty.\"",
+        "\"Confusion is the first step toward understanding.\"",
+        "\"It’s okay to explore and not know the outcome.\"",
+        "\"Clarity comes from action, not thought.\"",
+        "\"Sometimes, the best thing you can do is wait.\"",
+        "\"Every question is a step toward finding the answer.\"",
+        "\"The unknown is not something to fear, but something to explore.\"",
+        "\"Let yourself sit with uncertainty; the answers will come.\"",
+        "\"It’s okay to take your time finding your path.\"",
+        "\"The best journeys are the ones we don’t have all the answers for.\"",
+        "\"Sometimes, the most important thing is to keep moving forward.\"",
+        "\"Even when things are unclear, trust in your ability to figure it out.\"",
+        "\"In the uncertainty, new opportunities arise.\"",
+        "\"You don’t need all the answers to make progress.\"",
+        "\"Trust yourself to navigate the unknown.\"",
+        "\"Clarity is not something you find, it’s something you create.\""
+    ]
+        };
+    
+        let shownQuotes = {
+            good: [],
+            okay: [],
+            bad: [],
+            unsure: []
+        };
+    
+        let currentFeeling = '';
+    
+        function showQuote(feeling) {
+            currentFeeling = feeling;
+            const quoteArray = quotes[feeling];
+            const shownArray = shownQuotes[feeling];
+    
+            if (shownArray.length === quoteArray.length) {
+                document.getElementById('quote-text').textContent = "You've seen all quotes for today. Come back tomorrow!";
+                document.querySelector('.new-quote').classList.add('hidden'); // Hide the 'New quote' button
+                return;
+            }
+    
+            let randomQuote;
+            do {
+                randomQuote = quoteArray[Math.floor(Math.random() * quoteArray.length)];
+            } while (shownArray.includes(randomQuote));
+    
+            shownArray.push(randomQuote); // Add to the list of shown quotes
+    
+            document.getElementById('quote-text').textContent = randomQuote;
+            document.getElementById('quote-box').classList.add('active');
+            document.querySelector('.feeling-options').classList.add('hidden');
+            document.querySelector('.question').classList.add('hidden');
+            document.querySelector('.new-quote').classList.remove('hidden'); // Ensure the 'New quote' button is visible
+        }
+    
+        function copyQuote() {
+            const quoteText = document.getElementById('quote-text').textContent;
+            navigator.clipboard.writeText(quoteText).then(() => {
+                alert("Quote copied!");
+            });
+        }
+    
+        function shareQuote() {
+            const quoteText = document.getElementById('quote-text').textContent;
+            const shareData = {
+                text: quoteText,
+                url: window.location.href
+            };
+            navigator.share(shareData).catch(console.error);
+        }
+    </script>
+
+</body>
+</html>
